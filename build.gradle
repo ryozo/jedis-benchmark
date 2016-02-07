@@ -1,0 +1,17 @@
+group 'net.equj65.jedis'
+version '1.0-snapshot'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'redis.clients:jedis:2.8.0'
+    compile 'com.beust:jcommander:1.48'
+    compile 'org.projectlombok:lombok:1.16.2'
+}

@@ -2,12 +2,15 @@ package net.equj65.jedisbench;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import redis.clients.jedis.Jedis;
+import net.equj65.jedisbench.enums.Command;
+import net.equj65.jedisbench.runnner.OperationRunner;
+import net.equj65.jedisbench.runnner.OperationRunnerFactory;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
@@ -30,20 +33,24 @@ public class Benchmarker {
         this.requests = requests;
     }
 
-    /**
-     *
-     * @return
-     */
-    public Benchmark benchmark() {
+    public void benchmark() {
+        Arrays.stream(Command.values()).forEach(c -> benchmark_(c).printBenchmark());
+    }
+
+    private Benchmark benchmark_(Command command) {
         // TODO review of poolconfig
         JedisPool pool = new JedisPool(new JedisPoolConfig(), hostname, port);
         CountDownLatch latch = new CountDownLatch(requests);
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         String data = fillString(dataSize);
 
+        // TODO refactor
+        OperationRunner runner = OperationRunnerFactory
+                .createRunnerOf(command, pool, latch, data);
+
         long startOfMillis = System.currentTimeMillis();
         IntStream.range(0, threads).forEach(
-                i -> executor.submit(new BenchmarkTask(pool, latch, data))
+                i -> executor.submit(runner)
         );
 
         try {
@@ -57,38 +64,6 @@ public class Benchmarker {
         executor.shutdownNow();
 
         return new Benchmark(endOfMillis - startOfMillis);
-    }
-
-    /**
-     * Do the benchmark class.
-     * TODO Refactor
-     */
-    public static class BenchmarkTask implements Callable<Void> {
-        private JedisPool pool;
-        private CountDownLatch latch;
-        private String value;
-        BenchmarkTask(JedisPool pool, CountDownLatch latch, String value) {
-            this.pool = pool;
-            this.latch = latch;
-            this.value = value;
-        }
-
-        @Override
-        public Void call() throws Exception {
-            String key = Thread.currentThread().getName();
-            while (true) {
-                try (Jedis jedis = pool.getResource()) {
-                    jedis.set(key, value);
-                    // TODO implementation of get
-                }
-                latch.countDown();
-                if (Thread.currentThread().isInterrupted()) {
-                    // Thread shutdown.
-                    break;
-                }
-            }
-            return null;
-        }
     }
 
     /**

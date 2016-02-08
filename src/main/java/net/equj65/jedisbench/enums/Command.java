@@ -1,7 +1,11 @@
 package net.equj65.jedisbench.enums;
 
 /**
- * Created by ryozo on 2016/02/08.
+ * List of Redis command of the benchmark target.
+ *
+ * @author ryozo
  */
 public enum Command {
+    SET,
+    GET
 }

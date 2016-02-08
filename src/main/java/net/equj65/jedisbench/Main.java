@@ -27,9 +27,7 @@ public class Main {
 
         Benchmarker benchmarker = new Benchmarker(param.getHostname(),
                 param.getPort(), param.getThreads(), param.getDataSize(), param.getRequests());
-
-        Benchmarker.Benchmark benchmark = benchmarker.benchmark();
-        benchmark.printBenchmark();
+        benchmarker.benchmark();
     }
 
 }

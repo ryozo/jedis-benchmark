@@ -35,8 +35,8 @@ public class Benchmarker {
      * @return
      */
     public Benchmark benchmark() {
-        // TODO review of poolconfig and port settings
-        JedisPool pool = new JedisPool(new JedisPoolConfig(), hostname);
+        // TODO review of poolconfig
+        JedisPool pool = new JedisPool(new JedisPoolConfig(), hostname, port);
         CountDownLatch latch = new CountDownLatch(requests);
         ExecutorService executor = Executors.newFixedThreadPool(threads);
         String data = fillString(dataSize);

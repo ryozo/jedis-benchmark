@@ -14,4 +14,5 @@ dependencies {
     compile 'redis.clients:jedis:2.8.0'
     compile 'com.beust:jcommander:1.48'
     compile 'org.projectlombok:lombok:1.16.2'
+    compile 'ch.qos.logback:logback-classic:1.1.3'
 }

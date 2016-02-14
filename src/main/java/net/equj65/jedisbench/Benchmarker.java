@@ -96,6 +96,7 @@ public class Benchmarker {
         public void printBenchmark(PrintStream stream) {
             stream.println(String.format("[ Benchmark result of %s command ]", command));
             stream.println(String.format("  Elapsed time is %s milliseconds.", elapsetTime));
+            stream.println();
         }
     }
 }

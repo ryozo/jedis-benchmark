@@ -13,17 +13,20 @@ public class Main {
 
 
     public static void main(String[] args) {
-        logger.info("jedis-benchmark start.");
+        System.out.println("jedis-benchmark start.");
+        System.out.println("------------------------------------");
+        System.out.println();
 
         CommandLineParameter param = new CommandLineParameter();
         new JCommander(param, args);
 
-        logger.info("[ Benchmark settings ]");
-        logger.info("  Server hostname : {}", param.getHostname());
-        logger.info("  Server port : {}", param.getPort());
-        logger.info("  Number of parallel connections : {}", param.getThreads());
-        logger.info("  Data size of SET/GET value in bytes : {}", param.getDataSize());
-        logger.info("  Total number of requests : {}", param.getRequests());
+        System.out.println("[ Benchmark settings. ]");
+        System.out.println(String.format("  Server hostname : %s", param.getHostname()));
+        System.out.println(String.format("  Server port : %s", param.getPort()));
+        System.out.println(String.format("  Number of parallel connections : %s", param.getThreads()));
+        System.out.println(String.format("  Data size of SET/GET value in bytes : %s", param.getDataSize()));
+        System.out.println(String.format("  Total number of requests : %s", param.getRequests()));
+        System.out.println();
 
         Benchmarker benchmarker = new Benchmarker(param.getHostname(),
                 param.getPort(), param.getThreads(), param.getDataSize(), param.getRequests());

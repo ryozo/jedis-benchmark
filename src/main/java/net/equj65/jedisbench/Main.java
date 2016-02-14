@@ -21,6 +21,7 @@ public class Main {
         System.out.println(String.format("  Number of parallel connections : %s", param.getThreads()));
         System.out.println(String.format("  Data size of SET/GET value in bytes : %s", param.getDataSize()));
         System.out.println(String.format("  Total number of requests : %s", param.getRequests()));
+        System.out.println(String.format("  Variation of key range : %s", param.getKeySpaceLen()));
         System.out.println();
 
         Benchmarker benchmarker = new Benchmarker(param.getHostname(),

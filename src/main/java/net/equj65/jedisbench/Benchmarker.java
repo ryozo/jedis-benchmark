@@ -2,12 +2,15 @@ package net.equj65.jedisbench;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import redis.clients.jedis.Jedis;
+import net.equj65.jedisbench.enums.Command;
+import net.equj65.jedisbench.runnner.OperationRunner;
+import net.equj65.jedisbench.runnner.OperationRunnerFactory;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.PrintStream;
 import java.io.StringWriter;
+import java.util.Arrays;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
@@ -30,69 +33,43 @@ public class Benchmarker {
         this.requests = requests;
     }
 
-    /**
-     *
-     * @return
-     */
-    public Benchmark benchmark() {
-        // TODO review of poolconfig
-        JedisPool pool = new JedisPool(new JedisPoolConfig(), hostname, port);
-        CountDownLatch latch = new CountDownLatch(requests);
-        ExecutorService executor = Executors.newFixedThreadPool(threads);
-        String data = fillString(dataSize);
-
-        long startOfMillis = System.currentTimeMillis();
-        IntStream.range(0, threads).forEach(
-                i -> executor.submit(new BenchmarkTask(pool, latch, data))
-        );
-
-        try {
-            latch.await();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-
-        long endOfMillis = System.currentTimeMillis();
-
-        executor.shutdownNow();
-
-        return new Benchmark(endOfMillis - startOfMillis);
+    public void benchmark() {
+        Arrays.stream(Command.values()).forEach(c -> benchmark_(c).printBenchmark());
     }
 
-    /**
-     * Do the benchmark class.
-     * TODO Refactor
-     */
-    public static class BenchmarkTask implements Callable<Void> {
-        private JedisPool pool;
-        private CountDownLatch latch;
-        private String value;
-        BenchmarkTask(JedisPool pool, CountDownLatch latch, String value) {
-            this.pool = pool;
-            this.latch = latch;
-            this.value = value;
-        }
+    private Benchmark benchmark_(Command command) {
+        // TODO review of poolconfig
+        JedisPool pool = new JedisPool(new JedisPoolConfig(), hostname, port);
+        ExecutorService executor = Executors.newFixedThreadPool(threads);
+        CountDownLatch latch = new CountDownLatch(requests);
+        String data = fillString(dataSize);
 
-        @Override
-        public Void call() throws Exception {
-            String key = Thread.currentThread().getName();
-            while (true) {
-                try (Jedis jedis = pool.getResource()) {
-                    jedis.set(key, value);
-                    // TODO implementation of get
-                }
-                latch.countDown();
-                if (Thread.currentThread().isInterrupted()) {
-                    // Thread shutdown.
-                    break;
-                }
-            }
-            return null;
+        // TODO refactor
+        OperationRunner runner = OperationRunnerFactory
+                .createRunnerOf(command, pool, latch, data);
+        try {
+            long startOfMillis = System.currentTimeMillis();
+
+            IntStream.range(0, threads).forEach(
+                    i -> executor.submit(runner)
+            );
+            latch.await();
+
+            long elapsedMillis = System.currentTimeMillis() - startOfMillis;
+            return new Benchmark(command, elapsedMillis);
+
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+
+        } finally {
+            executor.shutdownNow();
+            pool.destroy();
         }
     }
 
     /**
      * This method create a string of the specified size.
+     *
      * @param lengthOfFill generate string size
      * @return
      */
@@ -104,20 +81,22 @@ public class Benchmarker {
 
     /**
      * To hold the benchmark results.
-     *
+     * <p>
      * TODO Give more finely
      */
     @AllArgsConstructor
     public static class Benchmark {
-        @Getter
-        private long elapsetTime;
+        @Getter private Command command;
+        @Getter private long elapsetTime;
 
         public void printBenchmark() {
             printBenchmark(System.out);
         }
 
         public void printBenchmark(PrintStream stream) {
-            stream.println(String.format("Elapsed time is [%s].", elapsetTime));
+            stream.println(String.format("[ Benchmark result of %s command ]", command));
+            stream.println(String.format("  Elapsed time is %s milliseconds.", elapsetTime));
+            stream.println();
         }
     }
 }

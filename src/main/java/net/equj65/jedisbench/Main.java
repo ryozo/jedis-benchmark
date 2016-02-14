@@ -24,8 +24,8 @@ public class Main {
         System.out.println(String.format("  Variation of key range : %s", param.getKeySpaceLen()));
         System.out.println();
 
-        Benchmarker benchmarker = new Benchmarker(param.getHostname(),
-                param.getPort(), param.getThreads(), param.getDataSize(), param.getRequests());
+        Benchmarker benchmarker = new Benchmarker(param.getHostname(), param.getPort(),
+                param.getThreads(), param.getDataSize(), param.getRequests(), param.getKeySpaceLen());
         benchmarker.benchmark();
     }
 

@@ -1,16 +1,11 @@
 package net.equj65.jedisbench;
 
 import com.beust.jcommander.JCommander;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author ryozo
  */
 public class Main {
-
-    private static final Logger logger = LoggerFactory.getLogger(Main.class);
-
 
     public static void main(String[] args) {
         System.out.println("jedis-benchmark start.");

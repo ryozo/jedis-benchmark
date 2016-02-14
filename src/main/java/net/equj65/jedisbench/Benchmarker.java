@@ -40,34 +40,37 @@ public class Benchmarker {
     private Benchmark benchmark_(Command command) {
         // TODO review of poolconfig
         JedisPool pool = new JedisPool(new JedisPoolConfig(), hostname, port);
-        CountDownLatch latch = new CountDownLatch(requests);
         ExecutorService executor = Executors.newFixedThreadPool(threads);
+        CountDownLatch latch = new CountDownLatch(requests);
         String data = fillString(dataSize);
 
         // TODO refactor
         OperationRunner runner = OperationRunnerFactory
                 .createRunnerOf(command, pool, latch, data);
-
-        long startOfMillis = System.currentTimeMillis();
-        IntStream.range(0, threads).forEach(
-                i -> executor.submit(runner)
-        );
-
         try {
+            long startOfMillis = System.currentTimeMillis();
+
+            IntStream.range(0, threads).forEach(
+                    i -> executor.submit(runner)
+            );
             latch.await();
+
+            long endOfMillis = System.currentTimeMillis();
+
+            return new Benchmark(endOfMillis - startOfMillis);
+
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
+
+        } finally {
+            executor.shutdownNow();
+            pool.destroy();
         }
-
-        long endOfMillis = System.currentTimeMillis();
-
-        executor.shutdownNow();
-
-        return new Benchmark(endOfMillis - startOfMillis);
     }
 
     /**
      * This method create a string of the specified size.
+     *
      * @param lengthOfFill generate string size
      * @return
      */
@@ -79,7 +82,7 @@ public class Benchmarker {
 
     /**
      * To hold the benchmark results.
-     *
+     * <p>
      * TODO Give more finely
      */
     @AllArgsConstructor

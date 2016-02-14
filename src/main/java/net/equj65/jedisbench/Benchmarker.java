@@ -24,13 +24,15 @@ public class Benchmarker {
     private int threads;
     private int dataSize;
     private int requests;
+    private int keySpaceLen;
 
-    public Benchmarker(String hostname, int port, int threads, int dataSize, int requests) {
+    public Benchmarker(String hostname, int port, int threads, int dataSize, int requests, int keySpaceLen) {
         this.hostname = hostname;
         this.port = port;
         this.threads = threads;
         this.dataSize = dataSize;
         this.requests = requests;
+        this.keySpaceLen = keySpaceLen;
     }
 
     public void benchmark() {

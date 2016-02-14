@@ -55,9 +55,8 @@ public class Benchmarker {
             );
             latch.await();
 
-            long endOfMillis = System.currentTimeMillis();
-
-            return new Benchmark(endOfMillis - startOfMillis);
+            long elapsedMillis = System.currentTimeMillis() - startOfMillis;
+            return new Benchmark(command, elapsedMillis);
 
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -87,15 +86,16 @@ public class Benchmarker {
      */
     @AllArgsConstructor
     public static class Benchmark {
-        @Getter
-        private long elapsetTime;
+        @Getter private Command command;
+        @Getter private long elapsetTime;
 
         public void printBenchmark() {
             printBenchmark(System.out);
         }
 
         public void printBenchmark(PrintStream stream) {
-            stream.println(String.format("Elapsed time is [%s].", elapsetTime));
+            stream.println(String.format("[ Benchmark result of %s command ]", command));
+            stream.println(String.format("  Elapsed time is %s milliseconds.", elapsetTime));
         }
     }
 }

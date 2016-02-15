@@ -11,7 +11,7 @@ public class RandomKeyGenerator implements KeyGenerator {
     private static final String KEY_PREFIX = "jedis-benchmark#";
     private AtomicInteger key = new AtomicInteger();
     private int keyRange;
-    RandomKeyGenerator(int keyRange) {
+    public RandomKeyGenerator(int keyRange) {
         this.keyRange = keyRange;
     }
 

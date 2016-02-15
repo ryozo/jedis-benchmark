@@ -2,6 +2,7 @@ package net.equj65.jedisbench;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import net.equj65.jedisbench.context.BenchmarkContext;
 import net.equj65.jedisbench.enums.Command;
 import net.equj65.jedisbench.runnner.OperationRunner;
 import net.equj65.jedisbench.runnner.OperationRunnerFactory;
@@ -19,20 +20,10 @@ import java.util.stream.IntStream;
  */
 public class Benchmarker {
 
-    private String hostname;
-    private int port;
-    private int threads;
-    private int dataSize;
-    private int requests;
-    private int keySpaceLen;
+    private BenchmarkContext context;
 
-    public Benchmarker(String hostname, int port, int threads, int dataSize, int requests, int keySpaceLen) {
-        this.hostname = hostname;
-        this.port = port;
-        this.threads = threads;
-        this.dataSize = dataSize;
-        this.requests = requests;
-        this.keySpaceLen = keySpaceLen;
+    public Benchmarker(BenchmarkContext context) {
+        this.context = context;
     }
 
     public void benchmark() {
@@ -41,18 +32,17 @@ public class Benchmarker {
 
     private Benchmark benchmark_(Command command) {
         // TODO review of poolconfig
-        JedisPool pool = new JedisPool(new JedisPoolConfig(), hostname, port);
-        ExecutorService executor = Executors.newFixedThreadPool(threads);
-        CountDownLatch latch = new CountDownLatch(requests);
-        String data = fillString(dataSize);
+        JedisPool pool = new JedisPool(new JedisPoolConfig(), context.getHostname(), context.getPort());
+        ExecutorService executor = Executors.newFixedThreadPool(context.getThreads());
+        CountDownLatch latch = new CountDownLatch(context.getRequests());
 
         // TODO refactor
         OperationRunner runner = OperationRunnerFactory
-                .createRunnerOf(command, pool, latch, data);
+                .createRunnerOf(command, context, pool, latch);
         try {
             long startOfMillis = System.currentTimeMillis();
 
-            IntStream.range(0, threads).forEach(
+            IntStream.range(0, context.getThreads()).forEach(
                     i -> executor.submit(runner)
             );
             latch.await();
@@ -67,18 +57,6 @@ public class Benchmarker {
             executor.shutdownNow();
             pool.destroy();
         }
-    }
-
-    /**
-     * This method create a string of the specified size.
-     *
-     * @param lengthOfFill generate string size
-     * @return
-     */
-    private static String fillString(int lengthOfFill) {
-        return new StringWriter() {{
-            IntStream.range(0, lengthOfFill).forEach(i -> write("a"));
-        }}.toString();
     }
 
     /**

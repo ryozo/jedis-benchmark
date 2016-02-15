@@ -1,13 +1,15 @@
 package net.equj65.jedisbench;
 
 import com.beust.jcommander.JCommander;
+import net.equj65.jedisbench.context.BenchmarkContext;
+import org.apache.commons.beanutils.BeanUtils;
 
 /**
  * @author ryozo
  */
 public class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
         System.out.println("jedis-benchmark start.");
         System.out.println("------------------------------------");
         System.out.println();
@@ -24,9 +26,16 @@ public class Main {
         System.out.println(String.format("  Variation of key range : %s", param.getKeySpaceLen()));
         System.out.println();
 
-        Benchmarker benchmarker = new Benchmarker(param.getHostname(), param.getPort(),
-                param.getThreads(), param.getDataSize(), param.getRequests(), param.getKeySpaceLen());
-        benchmarker.benchmark();
+        BenchmarkContext context = buildContext(param);
+
+        // Perform benchmark.
+        new Benchmarker(context).benchmark();
+    }
+
+    private static BenchmarkContext buildContext(CommandLineParameter parameter) throws Exception {
+        BenchmarkContext context = new BenchmarkContext();
+        BeanUtils.copyProperties(context, parameter);
+        return context;
     }
 
 }

@@ -21,4 +21,11 @@ public class BenchmarkContext {
     private int requests;
     /** Use random key. Specify the variation of key */
     private int keySpaceLen;
+    /** The number of acknowledged replicas in case of using the WAIT. If 0 is not use the WAIT. */
+    private int acknowledgedReplicas = 0;
+    /**
+     * The timeout of the WAIT in case of using the WAIT(default isn't timeout).
+     * When {@link #acknowledgedReplicas} is greater than or equal to 1, WAIT will be used.
+     */
+    private int waitTimeout = 0;
 }

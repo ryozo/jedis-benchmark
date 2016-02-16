@@ -30,4 +30,8 @@ public class CommandLineParameter {
     /** Total number of request */
     @Parameter(names = "-n", description = "Total number of requests (default 100000)")
     private int requests = 100000;
+
+    /** Use random key. Specify the variation of key */
+    @Parameter(names = "-r", description = "Use random key. Specify the variation of key(default not use randomkey)")
+    private int keySpaceLen = 1;
 }

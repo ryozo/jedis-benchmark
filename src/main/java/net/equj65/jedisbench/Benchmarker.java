@@ -10,7 +10,6 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
 import java.io.PrintStream;
-import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.concurrent.*;
 import java.util.stream.IntStream;

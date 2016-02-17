@@ -7,6 +7,7 @@ import net.equj65.jedisbench.generator.impl.FixedKeyGenerator;
 import net.equj65.jedisbench.generator.impl.RandomKeyGenerator;
 import net.equj65.jedisbench.runnner.impl.GetOperationRunner;
 import net.equj65.jedisbench.runnner.impl.SetOperationRunner;
+import net.equj65.jedisbench.runnner.impl.WaitReplicasSetOperationRunner;
 import redis.clients.jedis.JedisPool;
 
 import java.io.StringWriter;
@@ -24,6 +25,10 @@ public class OperationRunnerFactory {
         String data = fillString(context.getDataSize());
         switch (command) {
             case SET:
+                if (isUseWaitReplicas(context)) {
+                    return new WaitReplicasSetOperationRunner(pool, latch, data, generator,
+                            context.getAcknowledgedReplicas(), context.getWaitTimeout());
+                }
                 return new SetOperationRunner(pool, latch, data, generator);
             case GET:
                 return new GetOperationRunner(pool, latch, data, generator);
@@ -50,5 +55,8 @@ public class OperationRunnerFactory {
         }}.toString();
     }
 
+    private static boolean isUseWaitReplicas(BenchmarkContext context) {
+        return 1 <= context.getAcknowledgedReplicas();
+    }
 
 }

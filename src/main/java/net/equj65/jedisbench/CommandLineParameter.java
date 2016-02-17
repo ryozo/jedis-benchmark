@@ -34,4 +34,15 @@ public class CommandLineParameter {
     /** Use random key. Specify the variation of key */
     @Parameter(names = "-r", description = "Use random key. Specify the variation of key(default not use randomkey)")
     private int keySpaceLen = 1;
+
+    /** The number of acknowledged replicas in case of using the WAIT. If 0 is not use the WAIT. */
+    @Parameter(names = "--wait-replicas", description = "The number of acknowledged replicas in case of using the WAIT.")
+    private int acknowledgedReplicas = 0;
+
+    /**
+     * The timeout of the WAIT in case of using the WAIT(default isn't timeout).
+     * When {@link #acknowledgedReplicas} is greater than or equal to 1, WAIT will be used.
+     */
+    @Parameter(names = "--wait-timeout", description = "The timeout of the WAIT(default isn't timeout).")
+    private int waitTimeout = 0;
 }

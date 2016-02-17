@@ -24,6 +24,9 @@ public class Main {
         System.out.println(String.format("  Data size of SET/GET value in bytes : %s", param.getDataSize()));
         System.out.println(String.format("  Total number of requests : %s", param.getRequests()));
         System.out.println(String.format("  Variation of key range : %s", param.getKeySpaceLen()));
+        // TODO Condition to display only if WAIT is ON.
+        System.out.println(String.format("  The number of acknowledged replicas : %s", param.getAcknowledgedReplicas()));
+        System.out.println(String.format("  The timeout of the WAIT : %s", param.getWaitTimeout()));
         System.out.println();
 
         BenchmarkContext context = buildContext(param);

@@ -30,8 +30,7 @@ public class Benchmarker {
     }
 
     private Benchmark benchmark_(Command command) {
-        // TODO review of poolconfig
-        JedisPool pool = new JedisPool(new JedisPoolConfig(), context.getHostname(), context.getPort());
+        JedisPool pool = new JedisPool(createPoolConfig(context.getThreads()), context.getHostname(), context.getPort());
         ExecutorService executor = Executors.newFixedThreadPool(context.getThreads());
         CountDownLatch latch = new CountDownLatch(context.getRequests());
 
@@ -56,6 +55,20 @@ public class Benchmarker {
             executor.shutdownNow();
             pool.destroy();
         }
+    }
+
+    /**
+     * Create a {@link JedisPoolConfig} for the benchmark.
+     * @param numberOfMaxThreads Number of max thread.
+     * @return PoolConfiguration.
+     */
+    private JedisPoolConfig createPoolConfig(int numberOfMaxThreads) {
+        JedisPoolConfig config = new JedisPoolConfig();
+        config.setTestOnBorrow(true);
+        config.setTestOnReturn(true);
+        config.setMaxTotal(numberOfMaxThreads);
+
+        return config;
     }
 
     /**

@@ -5,6 +5,7 @@ import net.equj65.jedisbench.enums.Command;
 import net.equj65.jedisbench.generator.KeyGenerator;
 import net.equj65.jedisbench.generator.impl.FixedKeyGenerator;
 import net.equj65.jedisbench.generator.impl.RandomKeyGenerator;
+import net.equj65.jedisbench.mediator.StartSignal;
 import net.equj65.jedisbench.runnner.impl.GetOperationRunner;
 import net.equj65.jedisbench.runnner.impl.SetOperationRunner;
 import net.equj65.jedisbench.runnner.impl.WaitReplicasSetOperationRunner;
@@ -20,18 +21,19 @@ import java.util.stream.IntStream;
 public class OperationRunnerFactory {
 
     // TODO refactor
-    public static OperationRunner createRunnerOf(Command command, BenchmarkContext context, JedisPool pool, CountDownLatch latch) {
+    public static OperationRunner createRunnerOf(Command command, BenchmarkContext context,
+                           StartSignal startSignal, JedisPool pool, CountDownLatch latch) {
         KeyGenerator generator = createKeyGeneratorOf(context);
         String data = fillString(context.getDataSize());
         switch (command) {
             case SET:
                 if (isUseWaitReplicas(context)) {
-                    return new WaitReplicasSetOperationRunner(pool, latch, data, generator,
+                    return new WaitReplicasSetOperationRunner(startSignal, pool, latch, data, generator,
                             context.getAcknowledgedReplicas(), context.getWaitTimeout());
                 }
-                return new SetOperationRunner(pool, latch, data, generator);
+                return new SetOperationRunner(startSignal, pool, latch, data, generator);
             case GET:
-                return new GetOperationRunner(pool, latch, data, generator);
+                return new GetOperationRunner(startSignal, pool, latch, data, generator);
         }
         throw new IllegalArgumentException(String.format("Command [%s] is not supported.", command));
     }

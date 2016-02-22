@@ -4,14 +4,19 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 /**
- * Created by ryozo on 2016/02/20.
+ * This class synchronize that start of benchmark operations.
+ * When all of the thread was able to start preparation, perform
+ * the signal of the start.
+ * It is like a Traffic light to the signal of the start of the race.
+ *
+ * @author ryozo
  */
 public class StartSignal {
-    private static CyclicBarrier cyclicBarrier;
+    private CyclicBarrier cyclicBarrier;
     private volatile long startTime;
     private volatile boolean started;
-    public StartSignal(CyclicBarrier barrier) {
-        this.cyclicBarrier = barrier;
+    public StartSignal(int numberOfBenchmarkThreads) {
+        this.cyclicBarrier = new CyclicBarrier(numberOfBenchmarkThreads);
     }
     public void awaitStart() {
         try {

@@ -1,6 +1,7 @@
 package net.equj65.jedisbench.runnner.impl;
 
 import net.equj65.jedisbench.generator.KeyGenerator;
+import net.equj65.jedisbench.mediator.StartSignal;
 import net.equj65.jedisbench.runnner.OperationRunner;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
@@ -22,8 +23,9 @@ public class WaitReplicasSetOperationRunner extends OperationRunner {
     private int timeoutMillis;
 
     // TODO Refactor
-    public WaitReplicasSetOperationRunner(JedisPool pool, CountDownLatch latch, String value, KeyGenerator keyGenerator,
-                                          int acknowledgeReplicas, int timeoutMillis) {
+    public WaitReplicasSetOperationRunner(StartSignal startSignal, JedisPool pool, CountDownLatch latch,
+                                          String value, KeyGenerator keyGenerator, int acknowledgeReplicas, int timeoutMillis) {
+        super(startSignal);
         this.pool = pool;
         this.latch = latch;
         this.value = value;
@@ -34,7 +36,7 @@ public class WaitReplicasSetOperationRunner extends OperationRunner {
 
     // TODO Eliminating duplicate code
     @Override
-    public Void call() throws Exception {
+    public void operation() throws Exception {
         while (true) {
             try (Jedis jedis = pool.getResource()) {
                 jedis.set(keyGenerator.generateKey(), value);
@@ -47,6 +49,5 @@ public class WaitReplicasSetOperationRunner extends OperationRunner {
                 break;
             }
         }
-        return null;
     }
 }

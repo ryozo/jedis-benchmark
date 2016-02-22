@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import net.equj65.jedisbench.context.BenchmarkContext;
 import net.equj65.jedisbench.enums.Command;
+import net.equj65.jedisbench.mediator.StartSignal;
 import net.equj65.jedisbench.runnner.OperationRunner;
 import net.equj65.jedisbench.runnner.OperationRunnerFactory;
 import redis.clients.jedis.JedisPool;
@@ -32,20 +33,19 @@ public class Benchmarker {
     private Benchmark benchmark_(Command command) {
         JedisPool pool = new JedisPool(createPoolConfig(context.getThreads()), context.getHostname(), context.getPort());
         ExecutorService executor = Executors.newFixedThreadPool(context.getThreads());
+        StartSignal startSignal = new StartSignal(context.getThreads());
         CountDownLatch latch = new CountDownLatch(context.getRequests());
 
         // TODO refactor
         OperationRunner runner = OperationRunnerFactory
-                .createRunnerOf(command, context, pool, latch);
+                .createRunnerOf(command, context, startSignal, pool, latch);
         try {
-            long startOfMillis = System.currentTimeMillis();
-
             IntStream.range(0, context.getThreads()).forEach(
                     i -> executor.submit(runner)
             );
             latch.await();
 
-            long elapsedMillis = System.currentTimeMillis() - startOfMillis;
+            long elapsedMillis = System.currentTimeMillis() - startSignal.getStartTime();
             return new Benchmark(command, elapsedMillis);
 
         } catch (InterruptedException e) {

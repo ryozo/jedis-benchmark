@@ -7,6 +7,7 @@ import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * This class provides Benchmark by Jedis {@code set} Operation with the {@link Jedis#waitReplicas(int, long)}Command.
@@ -21,6 +22,7 @@ public class WaitReplicasSetOperationRunner extends OperationRunner {
     private KeyGenerator keyGenerator;
     private int acknowledgeReplicas;
     private int timeoutMillis;
+    private AtomicLong numberOfFailedWaitReplicas;
 
     // TODO Refactor
     public WaitReplicasSetOperationRunner(StartSignal startSignal, JedisPool pool, CountDownLatch latch,
@@ -32,6 +34,7 @@ public class WaitReplicasSetOperationRunner extends OperationRunner {
         this.keyGenerator = keyGenerator;
         this.acknowledgeReplicas = acknowledgeReplicas;
         this.timeoutMillis = timeoutMillis;
+        this.numberOfFailedWaitReplicas = new AtomicLong();
     }
 
     // TODO Eliminating duplicate code
@@ -40,8 +43,10 @@ public class WaitReplicasSetOperationRunner extends OperationRunner {
         while (true) {
             try (Jedis jedis = pool.getResource()) {
                 jedis.set(keyGenerator.generateKey(), value);
-                jedis.waitReplicas(acknowledgeReplicas, timeoutMillis);
-                // TODO Count the synchronization of less than the specified number
+                long numberOfReflectedReplicas = jedis.waitReplicas(acknowledgeReplicas, timeoutMillis);
+                if (numberOfReflectedReplicas < acknowledgeReplicas) {
+                    numberOfFailedWaitReplicas.incrementAndGet();
+                }
             }
             latch.countDown();
             if (Thread.currentThread().isInterrupted()) {

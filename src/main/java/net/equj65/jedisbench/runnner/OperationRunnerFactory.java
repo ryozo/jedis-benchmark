@@ -22,18 +22,18 @@ public class OperationRunnerFactory {
 
     // TODO refactor
     public static OperationRunner createRunnerOf(Command command, BenchmarkContext context,
-                           StartSignal startSignal, JedisPool pool, CountDownLatch latch) {
+                                                 JedisPool pool, CountDownLatch latch) {
         KeyGenerator generator = createKeyGeneratorOf(context);
         String data = fillString(context.getDataSize());
         switch (command) {
             case SET:
                 if (isUseWaitReplicas(context)) {
-                    return new WaitReplicasSetOperationRunner(startSignal, pool, latch, data, generator,
+                    return new WaitReplicasSetOperationRunner(pool, latch, data, generator,
                             context.getAcknowledgedReplicas(), context.getWaitTimeout());
                 }
-                return new SetOperationRunner(startSignal, pool, latch, data, generator);
+                return new SetOperationRunner(pool, latch, data, generator);
             case GET:
-                return new GetOperationRunner(startSignal, pool, latch, data, generator);
+                return new GetOperationRunner(pool, latch, data, generator);
         }
         throw new IllegalArgumentException(String.format("Command [%s] is not supported.", command));
     }

@@ -14,4 +14,9 @@ public class FixedKeyGenerator implements KeyGenerator {
     public String generateKey() {
         return FIXED_KEY;
     }
+
+    @Override
+    public String currentKey() {
+        return FIXED_KEY;
+    }
 }

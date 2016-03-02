@@ -18,6 +18,20 @@ public class RandomKeyGenerator implements KeyGenerator {
     @Override
     public String generateKey() {
         // TODO Investigate the performance impact.
-        return KEY_PREFIX.concat(String.valueOf(key.getAndUpdate(x -> x >= keyRange - 1 ? 0 : x + 1)));
+        return makeKeyOf(key.getAndUpdate(x -> x >= keyRange - 1 ? 0 : x + 1));
+    }
+
+    @Override
+    public String currentKey() {
+        return makeKeyOf(key.get());
+    }
+
+    /**
+     * Make key from argument value.
+     * @param value make key base value.
+     * @return made key
+     */
+    private String makeKeyOf(int value) {
+        return KEY_PREFIX.concat(String.valueOf(value));
     }
 }

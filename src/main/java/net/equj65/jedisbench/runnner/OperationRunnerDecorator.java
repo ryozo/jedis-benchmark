@@ -7,7 +7,7 @@ package net.equj65.jedisbench.runnner;
  */
 public abstract class OperationRunnerDecorator extends OperationRunner {
     protected OperationRunner runner;
-    public OperationRunnerDecorator(OperationRunner decoratedRunner) {
+    public OperationRunnerDecorator(OperationRunner runner) {
         this.runner = runner;
     }
 

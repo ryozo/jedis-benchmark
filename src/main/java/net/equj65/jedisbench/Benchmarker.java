@@ -33,19 +33,20 @@ public class Benchmarker {
     private Benchmark benchmark_(Command command) {
         JedisPool pool = new JedisPool(createPoolConfig(context.getThreads()), context.getHostname(), context.getPort());
         ExecutorService executor = Executors.newFixedThreadPool(context.getThreads());
-        StartSignal startSignal = new StartSignal(context.getThreads());
         CountDownLatch latch = new CountDownLatch(context.getRequests());
 
         // TODO refactor
         OperationRunner runner = OperationRunnerFactory
-                .createRunnerOf(command, context, startSignal, pool, latch);
+                .createRunnerOf(command, context, pool, latch);
         try {
-            IntStream.range(0, context.getThreads()).forEach(
+            long startMillis = System.currentTimeMillis();
+
+            IntStream.range(0, context.getRequests()).forEach(
                     i -> executor.submit(runner)
             );
-            latch.await();
 
-            long elapsedMillis = System.currentTimeMillis() - startSignal.getStartTime();
+            latch.await();
+            long elapsedMillis = System.currentTimeMillis() - startMillis;
             return new Benchmark(command, elapsedMillis);
 
         } catch (InterruptedException e) {

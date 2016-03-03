@@ -15,4 +15,10 @@ public interface KeyGenerator {
      */
     String generateKey();
 
+    /**
+     * Return a last generated key at this instance.
+     * @return last generated key
+     */
+    String currentKey();
+
 }
